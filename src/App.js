@@ -2,19 +2,19 @@ import React, { useState, useRef, useEffect} from 'react';
 import TodoList from './TodoList';
 import { v4 as uuidv4} from 'uuid'
 
-const dingdongsong = 'todoApp.todos'
+const LOCAL_STORAGE_KEY = 'todoApp.todos'
 
 function App() {
   const [todos, setTodos] = useState([])
   const nameRef = useRef()
 
   useEffect(() => {
-    const storedTodos = JSON.parse(localStorage.getItem(dingdongsong))
+    const storedTodos = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY))
     if (storedTodos) setTodos(storedTodos)
   }, [])
 
   useEffect(() => {
-    localStorage.setItem(dingdongsong, JSON.stringify(todos))
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todos))
   }, [todos])
 
   function checkToDo(id) {
@@ -25,7 +25,7 @@ function App() {
   }
 
   function doAddTodo(e) {
-    let name = nameRef.current.value
+    const name = nameRef.current.value
     if (name === '') return
     setTodos(prevTodos => {
       return [...prevTodos, { id: uuidv4(), name: name, complete: false}]
@@ -33,13 +33,18 @@ function App() {
     nameRef.current.value = null
   }
 
+  function handleClearToDos() {
+    const newTodos = todos.filter(todo => !todo.complete)
+    setTodos(newTodos)
+  }
+
   return (
     <>
     <TodoList todos={todos} checkToDo={checkToDo}/>
     <input ref={nameRef} type="text" />
     <button onClick={doAddTodo}>Add Todo</button>
-    <button>Clear Complete</button>
-    <div>0 left to do</div>
+    <button onClick={handleClearToDos}>Clear Complete</button>
+    <div>{todos.filter(todo => !todo.complete).length} left to do</div>
     </>
   )
 }
